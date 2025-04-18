@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Interview App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #header { display: none; }
+
+    body {
+      background-color: #e0e5ec;
+      color: #4d4f5c;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .neumorph {
+      background: #e0e5ec;
+      border-radius: 12px;
+      box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff;
+    }
+
+    .neumorph-btn {
+      background: #e0e5ec;
+      border-radius: 12px;
+      box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+      transition: all 0.3s ease;
+    }
+
+    .neumorph-btn:hover {
+      box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff;
+    }
+
+    .neumorph-input {
+      background: #e0e5ec;
+      border-radius: 10px;
+      border: none;
+      box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+      padding: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .neumorph-input:focus {
+      box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff, 0 0 10px #79a7ff;
+    }
+
+    .header {
+      background-color: #ffffff;
+      color: #2f3b56;
+      box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pt-24">
+
+  <header id="header" class="w-full flex justify-between items-center px-8 py-4 header fixed top-0 z-10">
+    <h1 class="text-2xl font-extrabold text-gray-700">AI Interviewer</h1>
+    <span id="usernameDisplay" class="text-gray-700 font-medium"></span>
+  </header>
+
+  <main class="w-full flex flex-col items-center justify-center px-4">
+
+    <section id="welcomeSection" class="text-center space-y-6 max-w-xl w-full p-10 neumorph mt-10">
+      <h2 class="text-3xl font-semibold text-indigo-700">Welcome to AI Interviewing System</h2>
+      <p class="text-gray-600 text-lg">Prepare for your interview with professional feedback using AI.</p>
+      <input id="nameInput" type="text" placeholder="Enter your name"
+             class="neumorph-input w-full text-gray-800" />
+      <button onclick="startInterview()"
+              class="neumorph-btn w-full bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg">
+        Start Interview
+      </button>
+    </section>
+
+    <section id="interviewSection" class="hidden w-full max-w-2xl mt-10 neumorph">
+      <div class="p-10 space-y-6">
+        <p id="questionText" class="text-xl font-semibold text-gray-900"></p>
+        <textarea id="answerInput" rows="4" placeholder="Your answer..."
+                  class="neumorph-input w-full text-gray-800"></textarea>
+        <button id="submitBtn" onclick="submitAnswer()"
+                class="neumorph-btn w-full bg-green-600 text-white font-semibold px-6 py-2 rounded-lg">
+          Submit
+        </button>
+
+        <!-- Spinner -->
+        <div id="loader" class="flex justify-center mt-2 hidden">
+          <svg class="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
+        </div>
+
+        <div id="analysis" class="mt-4 text-gray-700 text-base"></div>
+        <button id="nextBtn" onclick="nextQuestion()"
+                class="neumorph-btn w-full bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hidden">
+          Next Question
+        </button>
+      </div>
+    </section>
+
+    <section id="resultSection" class="hidden text-center mt-10 max-w-2xl w-full neumorph p-10">
+      <h3 class="text-3xl font-semibold text-indigo-700 mb-6">Your Interview Summary</h3>
+      <canvas id="scoreChart" width="400" height="200" class="mx-auto mb-6"></canvas>
+      <div id="tips" class="text-gray-700 text-lg"></div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const questions = [
+      "Tell me about yourself.",
+      "What are your strengths and weaknesses?",
+      "Describe a challenging situation and how you handled it.",
+      "Where do you see yourself in 5 years?",
+      "Why should we hire you?"
+    ];
+
+    let currentQuestion = 0;
+    let userName = "";
+    const answers = [];
+
+    function startInterview() {
+      userName = document.getElementById('nameInput').value;
+      if (!userName) return alert("Please enter your name");
+      document.getElementById('usernameDisplay').innerText = userName;
+      document.getElementById('header').style.display = 'flex';
+      document.getElementById('welcomeSection').style.display = 'none';
+      document.getElementById('interviewSection').classList.remove('hidden');
+      showQuestion();
+    }
+
+    function showQuestion() {
+      document.getElementById('questionText').innerText = questions[currentQuestion];
+      document.getElementById('answerInput').value = "";
+      document.getElementById('analysis').innerHTML = "";
+      document.getElementById('submitBtn').innerText = "Submit";
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('loader').classList.add('hidden');
+      document.getElementById('nextBtn').classList.add('hidden');
+    }
+
+    async function submitAnswer() {
+      const answer = document.getElementById('answerInput').value;
+      if (!answer) return alert("Please provide an answer");
+
+      document.getElementById('submitBtn').innerText = "Analyzing...";
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('loader').classList.remove('hidden');
+
+      try {
+        const response = await fetch('/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+		question: questions[currentQuestion],
+		answer 
+		})
+        });
+
+        const data = await response.json();
+        const analysis = data.analysis || "No feedback returned.";
+        answers.push({ question: questions[currentQuestion], answer, analysis });
+        document.getElementById('analysis').innerText = analysis;
+      } catch (e) {
+        document.getElementById('analysis').innerText = "Error fetching response.";
+      }
+
+      document.getElementById('loader').classList.add('hidden');
+
+      if (currentQuestion < questions.length - 1) {
+        document.getElementById('nextBtn').classList.remove('hidden');
+      } else {
+        document.getElementById('nextBtn').innerText = "View Results";
+        document.getElementById('nextBtn').classList.remove('hidden');
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        showQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('interviewSection').classList.add('hidden');
+      document.getElementById('resultSection').classList.remove('hidden');
+      const score = Math.floor(Math.random() * 6) + 5;
+      const tips = "Work on structuring responses better. Be more specific and confident.";
+      document.getElementById('tips').innerText = tips;
+      renderChart(score);
+    }
+
+    function renderChart(score) {
+      const ctx = document.getElementById('scoreChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Proficiency'],
+          datasets: [{
+            label: 'Score',
+            data: [score],
+            backgroundColor: ['rgba(59, 130, 246, 0.7)'],
+            borderColor: ['rgba(59, 130, 246, 1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true, max: 10 } }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
