@@ -25,6 +25,8 @@
       border-radius: 12px;
       box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
       transition: all 0.3s ease;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
     }
 
     .neumorph-btn:hover {
@@ -53,9 +55,17 @@
 </head>
 <body class="min-h-screen flex flex-col items-center pt-24">
 
+  <!-- Header -->
   <header id="header" class="w-full flex justify-between items-center px-8 py-4 header fixed top-0 z-10">
     <h1 class="text-2xl font-extrabold text-gray-700">AI Interviewer</h1>
-    <span id="usernameDisplay" class="text-gray-700 font-medium"></span>
+    <div class="flex items-center space-x-4">
+      <!-- Removed download button -->
+      <button onclick="location.reload()"
+              class="neumorph-btn text-white bg-red-500 rounded-lg">
+        Quit
+      </button>
+      <span id="usernameDisplay" class="text-gray-700 font-medium"></span>
+    </div>
   </header>
 
   <main class="w-full flex flex-col items-center justify-center px-4">
@@ -108,11 +118,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const questions = [
-      "Tell me about yourself.",
-      "What are your strengths and weaknesses?",
-      "Describe a challenging situation and how you handled it.",
-      "Where do you see yourself in 5 years?",
-      "Why should we hire you?"
+      "1. Tell me about yourself.",
+      "2.What are your strengths and weaknesses?",
+      "3.Describe a challenging situation and how you handled it.",
+      "4. Where do you see yourself in 5 years?",
+      "5. Why should we hire you?"
     ];
 
     let currentQuestion = 0;
@@ -152,14 +162,15 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-		question: questions[currentQuestion],
-		answer 
-		})
+            question: questions[currentQuestion],
+            answer 
+          })
         });
 
         const data = await response.json();
         const analysis = data.analysis || "No feedback returned.";
         answers.push({ question: questions[currentQuestion], answer, analysis });
+
         document.getElementById('analysis').innerText = analysis;
       } catch (e) {
         document.getElementById('analysis').innerText = "Error fetching response.";
