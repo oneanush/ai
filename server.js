@@ -1,3 +1,6 @@
+// AIzaSyAVxn1BI59-6n5eiP1tTyuC1nneb86vk0o
+// AIzaSyCl6XTjhcwD6j7KzgDVcWCKmmv3Men5n08
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -7,7 +10,7 @@ const app = express();
 const port = 3000;
 
 // Gemini API key
-const genAI = new GoogleGenerativeAI("AIzaSyCl6XTjhcwD6j7KzgDVcWCKmmv3Men5n08");
+const genAI = new GoogleGenerativeAI("AIzaSyAVxn1BI59-6n5eiP1tTyuC1nneb86vk0o");
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -22,16 +25,22 @@ app.post('/analyze', async (req, res) => {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro-exp-03-25' });
 
-    const prompt = `
-You are an expert interview evaluator. A candidate was asked the following question:
+    const prompt = `You are an expert career coach and hiring manager. I will give you an interview question and a candidate's answer. I want you to evaluate the answer with a detailed, creative, and constructive feedback.
 
-**Question:** ${question}
+Analyze the structure, clarity, and relevance of the response.
 
-The candidate responded with:
+Comment on the candidate’s communication skills, critical thinking, and domain knowledge.
 
-**Answer:** ${answer}
+Provide suggestions to improve the answer.
 
-Please analyze this answer and give constructive feedback, including strengths, weaknesses, and suggestions for improvement.
+Give a sample how should the answer look like.
+
+If suitable, include a short 1–2 sentence summary praising what was good in the answer.
+
+Here is the question and answer:
+
+Question: ${question}
+Answer: ${answer}
 `;
 
     const result = await model.generateContent(prompt);
