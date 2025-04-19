@@ -1,5 +1,6 @@
 // AIzaSyAVxn1BI59-6n5eiP1tTyuC1nneb86vk0o
 // AIzaSyCl6XTjhcwD6j7KzgDVcWCKmmv3Men5n08
+// AIzaSyAiTdonfdh-EcwpbVtfDDpLgZbWz0WEWAo new
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -10,7 +11,7 @@ const app = express();
 const port = 3000;
 
 // Gemini API key
-const genAI = new GoogleGenerativeAI("AIzaSyAVxn1BI59-6n5eiP1tTyuC1nneb86vk0o");
+const genAI = new GoogleGenerativeAI("AIzaSyAiTdonfdh-EcwpbVtfDDpLgZbWz0WEWAo");
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
